@@ -70,7 +70,13 @@ if (isset($_GET['function_code']) && $_GET['function_code'] == 'getCustomerTbleD
         http_response_code(403);
         exit('Invalid or missing security token. Please refresh the page and try again.');
     }
-    echo getLoginAdmin($_POST);
+    $loginResult = getLoginAdmin($_POST);
+
+        if ($loginResult === 'admin' || $loginResult === 'customer') {
+    echo $loginResult;
+} else {
+    echo '';
+}
 } else if (isset($_GET['function_code']) && $_GET['function_code'] == 'checkPasswordByEmail') {
     checkPasswordByName($_POST);
 } else if (isset($_GET['function_code']) && $_GET['function_code'] == 'editQty') {

@@ -167,20 +167,20 @@
 
                                         <tr>
 
-                                            <td>
-                                                <?php echo $row['name']; ?>
+                                           <td>
+                                                <?php echo htmlentities($row['name'], ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td>
-                                                <?php echo $row['email']; ?>
+                                                <?php echo htmlentities($row['email'], ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td>
-                                                <?php echo $row['phone']; ?>
+                                                <?php echo htmlentities($row['phone'], ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td>
-                                                <?php echo $row['nic']; ?>
+                                                <?php echo htmlentities($row['nic'], ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td>
-                                                <?php echo $row['address']; ?>
+                                                <?php echo htmlentities($row['address'], ENT_QUOTES, 'UTF-8'); ?>
                                             </td>
                                             <td>
                                                 <?php $getCat =  getBranchByID($row['branch_id']);
