@@ -1,0 +1,18 @@
+# Local testing files
+cookies.txt
+simple-datatables.js
+simple-datatables.css
+summernote.css
+sweetalert2.js
+
+# Local database configuration
+server/inc/connection.php
+
+# Environment/configuration files
+.env
+
+# OS/editor files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
