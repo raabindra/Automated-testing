@@ -73,7 +73,7 @@ if (isset($_GET['function_code']) && $_GET['function_code'] == 'getCustomerTbleD
     $loginResult = getLoginAdmin($_POST);
 
         if ($loginResult === 'admin' || $loginResult === 'customer') {
-    echo $loginResult;
+    echo htmlentities($loginResult, ENT_QUOTES, 'UTF-8');
 } else {
     echo '';
 }
