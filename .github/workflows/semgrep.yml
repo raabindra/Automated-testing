@@ -31,10 +31,215 @@ jobs:
             --json --output /src/semgrep-automation-report.json \
             /src
 
-      - name: Upload Semgrep JSON Report
+      - name: Generate HTML Report
+        if: always()
+        run: |
+          python3 - <<'PY'
+          import json
+          from html import escape
+
+          with open("semgrep-automation-report.json", "r", encoding="utf-8") as f:
+              report = json.load(f)
+
+          findings = report.get("results", [])
+          errors = report.get("errors", [])
+          scanned = report.get("paths", {}).get("scanned", [])
+
+          status = "PASS" if len(findings) == 0 and len(errors) == 0 else "REVIEW REQUIRED"
+
+          rows = ""
+
+          if findings:
+              for finding in findings:
+                  check = escape(str(finding.get("check_id", "")))
+                  path = escape(str(finding.get("path", "")))
+                  line = finding.get("start", {}).get("line", "")
+                  message = escape(str(finding.get("extra", {}).get("message", "")))
+
+                  rows += f"""
+                  <tr>
+                    <td>{check}</td>
+                    <td>{path}</td>
+                    <td>{line}</td>
+                    <td>{message}</td>
+                  </tr>
+                  """
+          else:
+              rows = """
+              <tr>
+                <td colspan="4" class="clean">
+                  ✓ No security findings detected
+                </td>
+              </tr>
+              """
+
+          html = f"""<!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="UTF-8">
+            <title>Semgrep SAST Report</title>
+            <style>
+              body {{
+                font-family: Arial, sans-serif;
+                margin: 40px;
+                background: #f5f7fa;
+                color: #222;
+              }}
+
+              .container {{
+                max-width: 1100px;
+                margin: auto;
+                background: white;
+                padding: 35px;
+                border-radius: 10px;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+              }}
+
+              h1 {{
+                margin-bottom: 5px;
+              }}
+
+              .subtitle {{
+                color: #666;
+                margin-bottom: 30px;
+              }}
+
+              .status {{
+                padding: 18px;
+                border-radius: 8px;
+                margin-bottom: 25px;
+                font-size: 22px;
+                font-weight: bold;
+              }}
+
+              .pass {{
+                background: #e8f5e9;
+                color: #1b5e20;
+              }}
+
+              .review {{
+                background: #fff3e0;
+                color: #e65100;
+              }}
+
+              .summary {{
+                display: grid;
+                grid-template-columns: repeat(4, 1fr);
+                gap: 15px;
+                margin-bottom: 35px;
+              }}
+
+              .card {{
+                background: #f5f7fa;
+                padding: 18px;
+                border-radius: 8px;
+              }}
+
+              .card strong {{
+                display: block;
+                font-size: 24px;
+                margin-top: 8px;
+              }}
+
+              table {{
+                width: 100%;
+                border-collapse: collapse;
+                margin-top: 15px;
+              }}
+
+              th, td {{
+                padding: 12px;
+                border: 1px solid #ddd;
+                text-align: left;
+              }}
+
+              th {{
+                background: #f0f2f5;
+              }}
+
+              .clean {{
+                text-align: center;
+                padding: 25px;
+                color: #1b5e20;
+                font-weight: bold;
+              }}
+
+              .footer {{
+                margin-top: 30px;
+                color: #777;
+                font-size: 13px;
+              }}
+            </style>
+          </head>
+
+          <body>
+            <div class="container">
+
+              <h1>Semgrep SAST Report</h1>
+              <div class="subtitle">
+                Automated Security Analysis Report
+              </div>
+
+              <div class="status {'pass' if status == 'PASS' else 'review'}">
+                Scan Status: {status}
+              </div>
+
+              <div class="summary">
+                <div class="card">
+                  Semgrep Version
+                  <strong>{escape(str(report.get("version", "Unknown")))}</strong>
+                </div>
+
+                <div class="card">
+                  Files Scanned
+                  <strong>{len(scanned)}</strong>
+                </div>
+
+                <div class="card">
+                  Findings
+                  <strong>{len(findings)}</strong>
+                </div>
+
+                <div class="card">
+                  Errors
+                  <strong>{len(errors)}</strong>
+                </div>
+              </div>
+
+              <h2>Security Findings</h2>
+
+              <table>
+                <tr>
+                  <th>Rule</th>
+                  <th>File</th>
+                  <th>Line</th>
+                  <th>Description</th>
+                </tr>
+
+                {rows}
+
+              </table>
+
+              <div class="footer">
+                Ruleset: p/php<br>
+                Generated automatically by the GitHub Actions Semgrep SAST pipeline.
+              </div>
+
+            </div>
+          </body>
+          </html>
+          """
+
+          with open("semgrep-automation-report.html", "w", encoding="utf-8") as f:
+              f.write(html)
+          PY
+
+      - name: Upload Semgrep Reports
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: semgrep-automation-report
-          path: semgrep-automation-report.json
+          name: semgrep-automation-reports
+          path: |
+            semgrep-automation-report.json
+            semgrep-automation-report.html
           if-no-files-found: error
