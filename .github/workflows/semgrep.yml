@@ -20,13 +20,13 @@ jobs:
         with:
           config: p/php
 
-      - name: Generate Semgrep JSON Report
+        - name: Generate Semgrep JSON Report
         if: always()
         run: |
           docker run --rm \
             -v "${{ github.workspace }}:/src" \
             semgrep/semgrep:latest \
-            scan --config p/php \
+            --config p/php \
             --json --output /src/semgrep-automation-report.json \
             /src
 
