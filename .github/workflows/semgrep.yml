@@ -24,9 +24,10 @@ jobs:
         if: always()
         run: |
           docker run --rm \
+            --entrypoint semgrep \
             -v "${{ github.workspace }}:/src" \
             semgrep/semgrep:latest \
-            --config p/php \
+            scan --config p/php \
             --json --output /src/semgrep-automation-report.json \
             /src
 
