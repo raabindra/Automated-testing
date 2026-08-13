@@ -19,3 +19,16 @@ jobs:
         uses: semgrep/semgrep-action@v1
         with:
           config: p/php
+
+      - name: Generate Semgrep JSON Report
+        if: always()
+        run: |
+          semgrep scan --config p/php --json --output semgrep-automation-report.json .
+
+      - name: Upload Semgrep JSON Report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-automation-report
+          path: semgrep-automation-report.json
+          if-no-files-found: error
